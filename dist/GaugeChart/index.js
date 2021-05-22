@@ -7,7 +7,17 @@ exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
-var _d = require("d3");
+var _d3Shape = require("d3-shape");
+
+var _d3Selection = require("d3-selection");
+
+var _d3Ease = require("d3-ease");
+
+var _d3Scale = require("d3-scale");
+
+var _d3Interpolate = require("d3-interpolate");
+
+var _d3Transition = require("d3-transition");
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
@@ -18,6 +28,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+// 63.7k (gzip 21.9k)
 
 /*
 GaugeChart creates a gauge chart using D3
@@ -51,14 +63,14 @@ var GaugeChart = function GaugeChart(props) {
   var container = (0, _react.useRef)({});
   var nbArcsToDisplay = (0, _react.useRef)(0);
   var colorArray = (0, _react.useRef)([]);
-  var arcChart = (0, _react.useRef)((0, _d.arc)());
+  var arcChart = (0, _react.useRef)((0, _d3Shape.arc)());
   var arcData = (0, _react.useRef)([]);
-  var pieChart = (0, _react.useRef)((0, _d.pie)());
+  var pieChart = (0, _react.useRef)((0, _d3Shape.pie)());
   var prevProps = (0, _react.useRef)(props);
   var selectedRef = (0, _react.useRef)({});
   (0, _react.useEffect)(function () {
     setArcData(props, nbArcsToDisplay, colorArray, arcData);
-    container.current = (0, _d.select)(selectedRef); //Initialize chart
+    container.current = (0, _d3Selection.select)(selectedRef); //Initialize chart
 
     initChart();
   }, []);
@@ -87,9 +99,9 @@ var GaugeChart = function GaugeChart(props) {
 
   (0, _react.useEffect)(function () {
     //Set up resize event listener to re-render the chart everytime the window is resized
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return function () {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [handleResize]);
 
@@ -174,7 +186,8 @@ GaugeChart.propTypes = {
   animate: _propTypes.default.bool,
   formatTextValue: _propTypes.default.func,
   fontSize: _propTypes.default.string,
-  animateDuration: _propTypes.default.number
+  animateDuration: _propTypes.default.number,
+  animDelay: _propTypes.default.number
 }; // This function update arc's datas when component is mounting or when one of arc's props is updated
 
 var setArcData = function setArcData(props, nbArcsToDisplay, colorArray, arcData) {
@@ -232,8 +245,8 @@ var renderChart = function renderChart(resize, prevProps, width, margin, height,
 
 var getColors = function getColors(props, nbArcsToDisplay) {
   var colors = props.colors;
-  var colorScale = (0, _d.scaleLinear)().domain([1, nbArcsToDisplay.current]).range([colors[0], colors[colors.length - 1]]) //Use the first and the last color as range
-  .interpolate(_d.interpolateHsl);
+  var colorScale = (0, _d3Scale.scaleLinear)().domain([1, nbArcsToDisplay.current]).range([colors[0], colors[colors.length - 1]]) //Use the first and the last color as range
+  .interpolate(_d3Interpolate.interpolateHsl);
   var colorArray = [];
 
   for (var i = 1; i <= nbArcsToDisplay.current; i++) {
@@ -267,8 +280,8 @@ var drawNeedle = function drawNeedle(resize, prevProps, props, width, needle, co
 
 
   if (!resize && animate) {
-    needle.current.transition().delay(props.animDelay).ease(_d.easeElastic).duration(props.animateDuration).tween("progress", function () {
-      var currentPercent = (0, _d.interpolateNumber)(prevPercent, percent);
+    (0, _d3Transition.transition)(needle.current).delay(props.animDelay).ease(_d3Ease.easeElastic).duration(props.animateDuration).tween("progress", function () {
+      var currentPercent = (0, _d3Interpolate.interpolateNumber)(prevPercent, percent);
       return function (percentOfPercent) {
         var progress = currentPercent(percentOfPercent);
         return container.current.select(".needle path").attr("d", calculateRotation(progress, outerRadius, width));

@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from "react";
-import {
-  arc,
-  pie,
-  select,
-  easeElastic,
-  scaleLinear,
-  interpolateHsl,
-  interpolateNumber,
-} from "d3";
+
+import { arc, pie } from "d3-shape";
+import { select } from "d3-selection";
+import { easeElastic } from "d3-ease";
+import { scaleLinear } from "d3-scale";
+import { interpolateHsl, interpolateNumber } from "d3-interpolate";
+import { transition } from "d3-transition";
+
+// 63.7k (gzip 21.9k)
+
 import PropTypes from "prop-types";
 
 import useDeepCompareEffect from "./customHooks";
@@ -38,28 +39,28 @@ const animateNeedleProps = [
 ];
 
 const GaugeChart = (props) => {
-  const svg = useRef({})
-  const g = useRef({})
-  const width = useRef({})
-  const height = useRef({})
-  const doughnut = useRef({})
-  const needle = useRef({})
-  const outerRadius = useRef({})
-  const margin = useRef({}) // = {top: 20, right: 50, bottom: 50, left: 50},
-  const container = useRef({})
-  const nbArcsToDisplay = useRef(0)
-  const colorArray = useRef([])
-  const arcChart = useRef(arc())
-  const arcData = useRef([])
-  const pieChart = useRef(pie())
+  const svg = useRef({});
+  const g = useRef({});
+  const width = useRef({});
+  const height = useRef({});
+  const doughnut = useRef({});
+  const needle = useRef({});
+  const outerRadius = useRef({});
+  const margin = useRef({}); // = {top: 20, right: 50, bottom: 50, left: 50},
+  const container = useRef({});
+  const nbArcsToDisplay = useRef(0);
+  const colorArray = useRef([]);
+  const arcChart = useRef(arc());
+  const arcData = useRef([]);
+  const pieChart = useRef(pie());
   const prevProps = useRef(props);
-  let selectedRef = useRef({})
+  let selectedRef = useRef({});
   useEffect(() => {
     setArcData(props, nbArcsToDisplay, colorArray, arcData);
     container.current = select(selectedRef);
     //Initialize chart
-    initChart()
-  }, [])
+    initChart();
+  }, []);
 
   useDeepCompareEffect(() => {
     if (
@@ -85,9 +86,8 @@ const GaugeChart = (props) => {
     props.needleBaseColor,
   ]);
 
-  
   const handleResize = () => {
-    var resize = true
+    var resize = true;
 
     renderChart(
       resize,
@@ -105,16 +105,16 @@ const GaugeChart = (props) => {
       props,
       container,
       arcData
-    )
-  }
+    );
+  };
   useEffect(() => {
     //Set up resize event listener to re-render the chart everytime the window is resized
-    window.addEventListener('resize', handleResize)
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener('resize', handleResize)
-    }
-  }, [handleResize])
-  
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [handleResize]);
+
   const initChart = (update, resize = false, prevProps) => {
     if (update) {
       renderChart(
@@ -154,7 +154,7 @@ const GaugeChart = (props) => {
       .sort(null);
     //Add the needle element
     needle.current = g.current.append("g").attr("class", "needle");
-   
+
     renderChart(
       resize,
       prevProps,
@@ -175,8 +175,15 @@ const GaugeChart = (props) => {
   };
 
   const { id, style, className } = props;
-  return <div id={id} className={className} style={style} ref={(svg) => selectedRef = svg}/>;
-}
+  return (
+    <div
+      id={id}
+      className={className}
+      style={style}
+      ref={(svg) => (selectedRef = svg)}
+    />
+  );
+};
 
 export default GaugeChart;
 
@@ -377,8 +384,7 @@ const drawNeedle = (
   }
   //Rotate the needle
   if (!resize && animate) {
-    needle.current
-      .transition()
+    transition(needle.current)
       .delay(props.animDelay)
       .ease(easeElastic)
       .duration(props.animateDuration)
